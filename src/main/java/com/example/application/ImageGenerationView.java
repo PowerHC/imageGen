@@ -22,29 +22,34 @@ import java.io.IOException;
 public class ImageGenerationView extends VerticalLayout {
 
     private byte[] bytes;
+    private final Image currentImage;
     private StreamResource streamResource;
+    private final ComboBox<Object> sizeBox;
+    private final TextField promptTextField;
+    private final ComboBox<Object> styleBox;
+    private final VerticalLayout verticalLayout;
 
     public ImageGenerationView(ImageGenerationService imageGenerationService) {
-        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
         verticalLayout.setAlignItems(Alignment.CENTER);
 
         H1 title = new H1("AI Image Generator");
 
-        TextField promptTextField = new TextField("Image Description");
+        promptTextField = new TextField("Image Description");
         promptTextField.setMinWidth(450, Unit.PIXELS);
 
-        ComboBox<Object> styleBox = new ComboBox<>("Style");
+        styleBox = new ComboBox<>("Style");
         styleBox.setItems("realistic","anime","flux-dev");
         styleBox.setValue("realistic");
         styleBox.setMaxWidth(135, Unit.PIXELS);
 
-        ComboBox<Object> sizeBox = new ComboBox<>("Size");
+        sizeBox = new ComboBox<>("Size");
         sizeBox.setItems("1:1", "3:2", "4:3", "3:4", "16:9", "9:16");
         sizeBox.setValue("4:3");
         sizeBox.setMaxWidth(105, Unit.PIXELS);
 
-        Image currentImage = new Image();
+        currentImage = new Image();
         currentImage.setMaxHeight("500px");
         currentImage.setMaxWidth("500px");
 
@@ -54,15 +59,7 @@ public class ImageGenerationView extends VerticalLayout {
 
         Button generateButton = new Button("Generate");
         promptTextField.addKeyPressListener(Key.ENTER, event -> {
-            if (streamResource != null) {
-                Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
-                historyImage.setMaxHeight("500px");
-                historyImage.setMaxWidth("500px");
-                verticalLayout.addComponentAtIndex(4, historyImage);
-            }
-            bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
-            streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-            currentImage.setSrc(streamResource);
+            generateImage(imageGenerationService);
 
             saveButton.setEnabled(true);
             saveButton.addClickListener(e -> {
@@ -74,15 +71,7 @@ public class ImageGenerationView extends VerticalLayout {
             });
         });
         generateButton.addClickListener(event -> {
-            if (streamResource != null) {
-                Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
-                historyImage.setMaxHeight("500px");
-                historyImage.setMaxWidth("500px");
-                verticalLayout.addComponentAtIndex(4, historyImage);
-            }
-            bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
-            streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-            currentImage.setSrc(streamResource);
+            generateImage(imageGenerationService);
 
             saveButton.setEnabled(true);
             saveButton.addClickListener(e -> {
@@ -103,6 +92,18 @@ public class ImageGenerationView extends VerticalLayout {
         verticalLayout.add(title, promptLayout, buttonLayout, currentImage);
 
         add(verticalLayout);
+    }
+
+    private void generateImage(ImageGenerationService imageGenerationService) {
+        if (streamResource != null) {
+            Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
+            historyImage.setMaxHeight("500px");
+            historyImage.setMaxWidth("500px");
+            verticalLayout.addComponentAtIndex(4, historyImage);
+        }
+        bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
+        streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
+        currentImage.setSrc(streamResource);
     }
 
 }
