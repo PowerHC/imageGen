@@ -16,19 +16,19 @@ import com.vaadin.flow.server.StreamResource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 @PageTitle("AI Image Generator")
 @Route("")
 public class ImageGenerationView extends VerticalLayout {
 
-    private final Image image;
-    private final Image image_old;
     private byte[] bytes;
     private StreamResource streamResource;
 
     public ImageGenerationView(ImageGenerationService imageGenerationService) {
-        setSizeFull();
-        setAlignItems(Alignment.CENTER);
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+        verticalLayout.setAlignItems(Alignment.CENTER);
 
         H1 title = new H1("AI Image Generator");
 
@@ -45,13 +45,9 @@ public class ImageGenerationView extends VerticalLayout {
         sizeBox.setValue("4:3");
         sizeBox.setMaxWidth(105, Unit.PIXELS);
 
-        image = new Image();
-        image.setMaxHeight("500px");
-        image.setMaxWidth("500px");
-
-        image_old = new Image();
-        image_old.setMaxHeight("500px");
-        image_old.setMaxWidth("500px");
+        Image currentImage = new Image();
+        currentImage.setMaxHeight("500px");
+        currentImage.setMaxWidth("500px");
 
         Button saveButton = new Button("Save Image");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -60,11 +56,14 @@ public class ImageGenerationView extends VerticalLayout {
         Button generateButton = new Button("Generate");
         promptTextField.addKeyPressListener(Key.ENTER, event -> {
             if (streamResource != null) {
-                image_old.setSrc(streamResource);
+                Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
+                historyImage.setMaxHeight("500px");
+                historyImage.setMaxWidth("500px");
+                verticalLayout.add(historyImage);
             }
             bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
             streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-            image.setSrc(streamResource);
+            currentImage.setSrc(streamResource);
 
             saveButton.setEnabled(true);
             saveButton.addClickListener(e -> {
@@ -77,11 +76,14 @@ public class ImageGenerationView extends VerticalLayout {
         });
         generateButton.addClickListener(event -> {
             if (streamResource != null) {
-                image_old.setSrc(streamResource);
+                Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
+                historyImage.setMaxHeight("500px");
+                historyImage.setMaxWidth("500px");
+                verticalLayout.add(historyImage);
             }
             bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
             streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-            image.setSrc(streamResource);
+            currentImage.setSrc(streamResource);
 
             saveButton.setEnabled(true);
             saveButton.addClickListener(e -> {
@@ -99,7 +101,9 @@ public class ImageGenerationView extends VerticalLayout {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.add(generateButton, saveButton);
 
-        add(title, promptLayout, buttonLayout, image, image_old);
+        verticalLayout.add(title, promptLayout, buttonLayout, currentImage);
+
+        add(verticalLayout);
     }
 
 }
