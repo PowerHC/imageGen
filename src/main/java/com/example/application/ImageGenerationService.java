@@ -65,6 +65,6 @@ public class ImageGenerationService {
     public void saveImage(byte[] imageSrc, String prompt) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageSrc);
         BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
-        ImageIO.write(bufferedImage, "png", new File("C:\\Users\\Rechner02\\Pictures\\" + prompt.replace(" ", "") + ".png"));
+        ImageIO.write(bufferedImage, "png", new File("PATH" + prompt.replace(" ", "") + ".png"));
     }
 }
