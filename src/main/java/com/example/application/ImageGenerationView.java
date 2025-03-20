@@ -58,7 +58,7 @@ public class ImageGenerationView extends VerticalLayout {
                 Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
                 historyImage.setMaxHeight("500px");
                 historyImage.setMaxWidth("500px");
-                verticalLayout.add(historyImage);
+                verticalLayout.addComponentAtIndex(4, historyImage);
             }
             bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
             streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
@@ -78,7 +78,7 @@ public class ImageGenerationView extends VerticalLayout {
                 Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
                 historyImage.setMaxHeight("500px");
                 historyImage.setMaxWidth("500px");
-                verticalLayout.add(historyImage);
+                verticalLayout.addComponentAtIndex(4, historyImage);
             }
             bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
             streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
