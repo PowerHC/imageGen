@@ -22,7 +22,7 @@ import java.io.IOException;
 public class ImageGenerationView extends VerticalLayout {
 
     private final Image image;
-    private final Image imagealt;
+    private final Image image_old;
     private byte[] bytes;
     private StreamResource streamResource;
 
@@ -32,25 +32,26 @@ public class ImageGenerationView extends VerticalLayout {
 
         H1 title = new H1("AI Image Generator");
 
-        TextField promptTextField = new TextField("Image Description: ");
+        TextField promptTextField = new TextField("Image Description");
+        promptTextField.setMinWidth(450, Unit.PIXELS);
 
         ComboBox<Object> styleBox = new ComboBox<>("Style");
         styleBox.setItems("realistic","anime","flux-dev");
         styleBox.setValue("realistic");
-        styleBox.setMinWidth(20, Unit.PIXELS);
+        styleBox.setMaxWidth(135, Unit.PIXELS);
 
         ComboBox<Object> sizeBox = new ComboBox<>("Size");
         sizeBox.setItems("1:1", "3:2", "4:3", "3:4", "16:9", "9:16");
         sizeBox.setValue("4:3");
-        sizeBox.setMinWidth(20, Unit.PIXELS);
+        sizeBox.setMaxWidth(105, Unit.PIXELS);
 
         image = new Image();
         image.setMaxHeight("500px");
         image.setMaxWidth("500px");
 
-        imagealt = new Image();
-        imagealt.setMaxHeight("500px");
-        imagealt.setMaxWidth("500px");
+        image_old = new Image();
+        image_old.setMaxHeight("500px");
+        image_old.setMaxWidth("500px");
 
         Button saveButton = new Button("Save Image");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -59,15 +60,11 @@ public class ImageGenerationView extends VerticalLayout {
         Button generateButton = new Button("Generate");
         promptTextField.addKeyPressListener(Key.ENTER, event -> {
             if (streamResource != null) {
-                imagealt.setSrc(streamResource);
-                bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
-                streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-                image.setSrc(streamResource);
-            }else {
-                bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
-                streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-                image.setSrc(streamResource);
+                image_old.setSrc(streamResource);
             }
+            bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
+            streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
+            image.setSrc(streamResource);
 
             saveButton.setEnabled(true);
             saveButton.addClickListener(e -> {
@@ -80,15 +77,11 @@ public class ImageGenerationView extends VerticalLayout {
         });
         generateButton.addClickListener(event -> {
             if (streamResource != null) {
-                imagealt.setSrc(streamResource);
-                bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
-                streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-                image.setSrc(streamResource);
-            }else {
-                bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
-                streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
-                image.setSrc(streamResource);
+                image_old.setSrc(streamResource);
             }
+            bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
+            streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
+            image.setSrc(streamResource);
 
             saveButton.setEnabled(true);
             saveButton.addClickListener(e -> {
@@ -106,7 +99,7 @@ public class ImageGenerationView extends VerticalLayout {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.add(generateButton, saveButton);
 
-        add(title, promptLayout, buttonLayout, image, imagealt);
+        add(title, promptLayout, buttonLayout, image, image_old);
     }
 
 }

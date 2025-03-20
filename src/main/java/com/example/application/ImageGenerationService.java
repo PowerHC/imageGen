@@ -19,7 +19,7 @@ public class ImageGenerationService {
     private final RestTemplate restTemplate = createRestTemplate();
 
     private static final String API_URL = "https://api.vyro.ai/v2/image/generations";
-    private static final String API_KEY = "API_KEY";
+    private static final String API_KEY = "vk-iwrS92DWUBD3xAuBUcqXG23jKqYsunQyhIkoo8DFRDCHEay";
 
     public byte[] generateImageResource(String prompt, String style, String size) {
         if (prompt == null || prompt.isEmpty()) {
