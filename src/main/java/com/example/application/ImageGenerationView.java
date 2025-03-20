@@ -40,7 +40,7 @@ public class ImageGenerationView extends VerticalLayout {
         promptTextField.setMinWidth(450, Unit.PIXELS);
 
         styleBox = new ComboBox<>("Style");
-        styleBox.setItems("realistic","anime","flux-dev");
+        styleBox.setItems("realistic","anime","imagine-turbo");
         styleBox.setValue("realistic");
         styleBox.setMaxWidth(135, Unit.PIXELS);
 
