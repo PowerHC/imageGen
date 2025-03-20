@@ -4,7 +4,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -23,10 +23,10 @@ public class ImageGenerationView extends VerticalLayout {
 
     private byte[] bytes;
     private final Image currentImage;
+    private final Select<String> sizeBox;
+    private final Select<String> styleBox;
     private StreamResource streamResource;
-    private final ComboBox<Object> sizeBox;
     private final TextField promptTextField;
-    private final ComboBox<Object> styleBox;
     private final VerticalLayout verticalLayout;
 
     public ImageGenerationView(ImageGenerationService imageGenerationService) {
@@ -39,15 +39,17 @@ public class ImageGenerationView extends VerticalLayout {
         promptTextField = new TextField("Image Description");
         promptTextField.setMinWidth(450, Unit.PIXELS);
 
-        styleBox = new ComboBox<>("Style");
+        styleBox = new Select<>();
+        styleBox.setLabel("Style");
         styleBox.setItems("realistic","anime","imagine-turbo");
         styleBox.setValue("realistic");
-        styleBox.setMaxWidth(135, Unit.PIXELS);
+        styleBox.setMaxWidth(160, Unit.PIXELS);
 
-        sizeBox = new ComboBox<>("Size");
+        sizeBox = new Select<>();
+        sizeBox.setLabel("Size");
         sizeBox.setItems("1:1", "3:2", "4:3", "3:4", "16:9", "9:16");
         sizeBox.setValue("4:3");
-        sizeBox.setMaxWidth(105, Unit.PIXELS);
+        sizeBox.setMaxWidth(85, Unit.PIXELS);
 
         currentImage = new Image();
         currentImage.setMaxHeight("500px");
@@ -101,7 +103,7 @@ public class ImageGenerationView extends VerticalLayout {
             historyImage.setMaxWidth("500px");
             verticalLayout.addComponentAtIndex(4, historyImage);
         }
-        bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue().toString(), sizeBox.getValue().toString());
+        bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue(), sizeBox.getValue());
         streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
         currentImage.setSrc(streamResource);
     }
