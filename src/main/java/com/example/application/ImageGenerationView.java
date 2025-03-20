@@ -16,7 +16,6 @@ import com.vaadin.flow.server.StreamResource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.List;
 
 @PageTitle("AI Image Generator")
 @Route("")
