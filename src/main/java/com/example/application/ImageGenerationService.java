@@ -1,6 +1,5 @@
 package com.example.application;
 
-
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -16,10 +15,11 @@ import java.io.IOException;
 
 @Service
 public class ImageGenerationService {
-    private final RestTemplate restTemplate = createRestTemplate();
+    private static final RestTemplate restTemplate = createRestTemplate();
 
     private static final String API_URL = "https://api.vyro.ai/v2/image/generations";
     private static final String API_KEY = "API_KEY";
+    private static final String STORAGE_API_URI = "STORAGE_API_URI"; //Custom Rest API
 
     public byte[] generateImageResource(String prompt, String style, String size) {
         if (prompt == null || prompt.isEmpty()) {
@@ -55,7 +55,7 @@ public class ImageGenerationService {
         };
     }
 
-    private RestTemplate createRestTemplate() {
+    private static RestTemplate createRestTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(60000);
         factory.setReadTimeout(60000);
@@ -65,6 +65,26 @@ public class ImageGenerationService {
     public void saveImage(byte[] imageSrc, String prompt) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageSrc);
         BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
-        ImageIO.write(bufferedImage, "png", new File("PATH" + prompt.replace(" ", "") + ".png"));
+        ImageIO.write(bufferedImage, "png", new File("C:\\Users\\a.gottschalk\\Pictures" + prompt.replace(" ", "") + ".png"));
+    }
+
+    public static String postToRest(String imageSrc, String time) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String map = "{\"name\":\""+ time +"\", \"imageSrc\":\""+ imageSrc +"\"}";
+
+        HttpEntity<String> request = new HttpEntity<>(map, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(STORAGE_API_URI + "/images", request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Fehler beim Speichern des Bildes: " + response.getStatusCode());
+        }
+    }
+
+    public String[] getAllImages(){
+        return restTemplate.getForObject(STORAGE_API_URI + "/images/imageSrc", String[].class);
     }
 }

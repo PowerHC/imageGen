@@ -13,9 +13,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import jakarta.xml.bind.DatatypeConverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 @PageTitle("AI Image Generator")
 @Route("")
@@ -60,18 +64,6 @@ public class ImageGenerationView extends VerticalLayout {
         saveButton.setEnabled(false);
 
         Button generateButton = new Button("Generate");
-        promptTextField.addKeyPressListener(Key.ENTER, event -> {
-            generateImage(imageGenerationService);
-
-            saveButton.setEnabled(true);
-            saveButton.addClickListener(e -> {
-                try {
-                    imageGenerationService.saveImage(bytes, promptTextField.getValue());
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
-        });
         generateButton.addClickListener(event -> {
             generateImage(imageGenerationService);
 
@@ -84,12 +76,28 @@ public class ImageGenerationView extends VerticalLayout {
                 }
             });
         });
+        promptTextField.addKeyPressListener(Key.ENTER, event -> {
+            generateImage(imageGenerationService);
+
+            saveButton.setEnabled(true);
+            saveButton.addClickListener(e -> {
+                try {
+                    imageGenerationService.saveImage(bytes, promptTextField.getValue());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        });
+
+        Button getHistory = new Button("Get History");
+        getHistory.addClickListener(event ->
+           getImages(imageGenerationService));
 
         HorizontalLayout promptLayout = new HorizontalLayout();
         promptLayout.add(promptTextField, styleBox, sizeBox);
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.add(generateButton, saveButton);
+        buttonLayout.add(generateButton, saveButton, getHistory);
 
         verticalLayout.add(title, promptLayout, buttonLayout, currentImage);
 
@@ -97,15 +105,34 @@ public class ImageGenerationView extends VerticalLayout {
     }
 
     private void generateImage(ImageGenerationService imageGenerationService) {
+        LocalDateTime now = LocalDateTime.now();
+        String formattedTime = now.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
         if (streamResource != null) {
-            Image historyImage = new Image(currentImage.getSrc(), "Generated image history");
+            Image historyImage = new Image(currentImage.getSrc(), formattedTime);
             historyImage.setMaxHeight("500px");
             historyImage.setMaxWidth("500px");
             verticalLayout.addComponentAtIndex(4, historyImage);
         }
         bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue(), sizeBox.getValue());
-        streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(bytes));
+        streamResource = new StreamResource(formattedTime + ".png", () -> new ByteArrayInputStream(bytes));
         currentImage.setSrc(streamResource);
+
+        String str = Base64.getEncoder().encodeToString(bytes);
+        String response = ImageGenerationService.postToRest(str, formattedTime);
+    }
+
+    private void getImages(ImageGenerationService imageHistoryService) {
+        String[] imageSrcs = imageHistoryService.getAllImages();
+
+        for (String imageSrc : imageSrcs) {
+            byte[] image_bytes = DatatypeConverter.parseBase64Binary(imageSrc);
+            StreamResource streamResource = new StreamResource("image.png", () -> new ByteArrayInputStream(image_bytes));
+
+            Image historyImage = new Image(streamResource, "");
+            historyImage.setMaxHeight("500px");
+            historyImage.setMaxWidth("500px");
+            verticalLayout.addComponentAtIndex(4, historyImage);
+        }
     }
 
 }
