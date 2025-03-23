@@ -69,6 +69,10 @@ public class ImageGenerationService {
     }
 
     public static String postToRest(String imageSrc, String time) {
+        if (imageSrc == null || imageSrc.isEmpty()) {
+            return "Invalid";
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

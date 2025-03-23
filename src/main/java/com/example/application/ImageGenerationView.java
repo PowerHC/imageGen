@@ -31,10 +31,14 @@ public class ImageGenerationView extends VerticalLayout {
     private final Select<String> styleBox;
     private StreamResource streamResource;
     private final TextField promptTextField;
-    private final VerticalLayout verticalLayout;
+    private final VerticalLayout historyLayout;
 
     public ImageGenerationView(ImageGenerationService imageGenerationService) {
-        verticalLayout = new VerticalLayout();
+        historyLayout = new VerticalLayout();
+        historyLayout.setSizeFull();
+        historyLayout.setAlignItems(Alignment.CENTER);
+
+        VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
         verticalLayout.setAlignItems(Alignment.CENTER);
 
@@ -90,8 +94,11 @@ public class ImageGenerationView extends VerticalLayout {
         });
 
         Button getHistory = new Button("Get History");
-        getHistory.addClickListener(event ->
-           getImages(imageGenerationService));
+        getHistory.addClickListener(event -> {
+           currentImage.setSrc("");
+           historyLayout.removeAll();
+           getImages(imageGenerationService);
+        });
 
         HorizontalLayout promptLayout = new HorizontalLayout();
         promptLayout.add(promptTextField, styleBox, sizeBox);
@@ -99,7 +106,7 @@ public class ImageGenerationView extends VerticalLayout {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.add(generateButton, saveButton, getHistory);
 
-        verticalLayout.add(title, promptLayout, buttonLayout, currentImage);
+        verticalLayout.add(title, promptLayout, buttonLayout, currentImage, historyLayout);
 
         add(verticalLayout);
     }
@@ -111,7 +118,7 @@ public class ImageGenerationView extends VerticalLayout {
             Image historyImage = new Image(currentImage.getSrc(), formattedTime);
             historyImage.setMaxHeight("500px");
             historyImage.setMaxWidth("500px");
-            verticalLayout.addComponentAtIndex(4, historyImage);
+            historyLayout.addComponentAtIndex(0, historyImage);
         }
         bytes = imageGenerationService.generateImageResource(promptTextField.getValue(), styleBox.getValue(), sizeBox.getValue());
         streamResource = new StreamResource(formattedTime + ".png", () -> new ByteArrayInputStream(bytes));
@@ -131,7 +138,7 @@ public class ImageGenerationView extends VerticalLayout {
             Image historyImage = new Image(streamResource, "");
             historyImage.setMaxHeight("500px");
             historyImage.setMaxWidth("500px");
-            verticalLayout.addComponentAtIndex(4, historyImage);
+            historyLayout.addComponentAtIndex(0, historyImage);
         }
     }
 
