@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Service
 public class ImageGenerationService {
@@ -89,6 +90,13 @@ public class ImageGenerationService {
     }
 
     public String[] getAllImages(){
-        return restTemplate.getForObject(STORAGE_API_URI + "/images/imageSrc", String[].class);
+        String[] allImages = restTemplate.getForObject(STORAGE_API_URI + "/images/imageSrc", String[].class);
+        String[] err = new String[]{"Something went wrong!"};
+
+        if (Arrays.equals(allImages, err)) {
+            return err;
+        }
+
+        return allImages;
     }
 }

@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Base64;
 
 @PageTitle("AI Image Generator")
@@ -130,6 +131,13 @@ public class ImageGenerationView extends VerticalLayout {
 
     private void getImages(ImageGenerationService imageHistoryService) {
         String[] imageSrcs = imageHistoryService.getAllImages();
+
+        if (Arrays.equals(imageSrcs, new String[]{"Something went wrong!"})) {
+            H1 err = new H1("Something went wrong!");
+            historyLayout.addComponentAtIndex(0, err);
+
+            return;
+        }
 
         for (String imageSrc : imageSrcs) {
             byte[] image_bytes = DatatypeConverter.parseBase64Binary(imageSrc);
